@@ -1,0 +1,17 @@
+{
+  "name": "spatial-museum-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/server.mjs src",
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/server.mjs dist",
+    "test": "node --test test/*.test.mjs",
+    "verify:catalog": "node scripts/verify-catalog.mjs",
+    "check": "npm run verify:catalog && npm test && node --check src/app.js && node --check src/viewer.js && npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
