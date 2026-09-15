@@ -1,0 +1,32 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: HTTP acceptance
+        shell: bash
+        run: |
+          npm start > /tmp/spatial-museum.log 2>&1 &
+          PID=$!
+          trap 'kill $PID || true' EXIT
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:4173/ >/tmp/index.html; then break; fi
+            sleep 0.25
+          done
+          grep -q 'Spatial Museum Platform' /tmp/index.html
+          curl -fsS http://127.0.0.1:4173/catalog.js | grep -q 'helix-no-1'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4173/not-found.txt)" = "404"
